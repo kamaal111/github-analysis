@@ -1,0 +1,36 @@
+# List available commands
+default:
+    just --list --unsorted --list-heading $'Available commands\n'
+
+# Set up dev container. This step runs after building the dev container
+post-create: setup-zsh-environment install-atuin install-rye
+
+[private]
+setup-zsh-environment:
+    #!/bin/zsh
+
+    echo "Updating zsh configuration"
+    cp -f .zshrc ~/.zshrc
+
+[private]
+install-atuin:
+    #!/bin/zsh
+
+    echo Y | bash <(curl --proto '=https' --tlsv1.2 -sSf https://setup.atuin.sh)
+
+[private]
+install-rye:
+    #!/bin/zsh
+
+    . ~/.zshrc
+
+    cp -f rye-config.toml ~/.rye/config.toml
+    curl -sSf https://rye.astral.sh/get | RYE_INSTALL_OPTION="--yes"  bash
+
+    . "$HOME/.rye/env"
+
+    mkdir -p ~/.zfunc
+    rye self completion -s zsh > ~/.zfunc/_rye
+
+    mkdir -p $ZSH_CUSTOM/plugins/rye
+    rye self completion -s zsh > $ZSH_CUSTOM/plugins/rye/_rye

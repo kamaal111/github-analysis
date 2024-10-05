@@ -23,7 +23,8 @@
 				"charliermarsh.ruff",
 				"ms-toolsai.jupyter",
 				"mechatroner.rainbow-csv",
-				"qwtel.sqlite-viewer"
+				"qwtel.sqlite-viewer",
+				"graphql.vscode-graphql"
 			]
 		}
 	},

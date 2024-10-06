@@ -13,10 +13,16 @@ class GitHubAuthor(BaseModel):
     login: str
 
 
+class GitHubRepository(BaseModel):
+    name: str
+    nameWithOwner: str
+
+
 class GitHubPullRequest(BaseModel):
     createdAt: datetime
     author: GitHubAuthor
     comments: GitHubComments
+    baseRepository: GitHubRepository
 
 
 class GitHubPullRequests(BaseModel):

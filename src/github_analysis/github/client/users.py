@@ -10,7 +10,7 @@ from .validators.pull_requests import GitHubPullRequest, GitHubUsersPullRequestR
 PullRequestStates = Literal["MERGED", "OPEN", "CLOSED"]
 
 
-PER_PAGE_AMOUNT = 100
+PER_PAGE_AMOUNT = 10
 
 
 class GitHubUsersClient(BaseGitHubClient):
@@ -37,6 +37,10 @@ class GitHubUsersClient(BaseGitHubClient):
                             }
                             comments {
                                 totalCount
+                            }
+                            baseRepository {
+                                name
+                                nameWithOwner
                             }
                         }
                         pageInfo {

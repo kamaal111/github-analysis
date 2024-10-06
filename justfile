@@ -19,12 +19,20 @@ post-dev-container-create:
 # Bootstrap project
 bootstrap: install-modules setup-pre-commit
 
+# Install the tools needed to run the project
+install-tools: install-rye bootstrap
+
+[private]
+install-rye:
+    #!/bin/zsh
+
+    curl -sSf https://rye.astral.sh/get | RYE_INSTALL_OPTION="--yes" bash
+
 [private]
 install-modules:
     #!/bin/zsh
 
     . "$HOME/.rye/env"
-
     rye sync
 
 [private]

@@ -35,6 +35,16 @@ class BaseGitHubClient:
     ) -> list[ItemNode]:
         new_params = {**(params or {}), "beforeCursor": None}
         nodes: list[ItemNode] = []
+
+        def node_is_less_then_until(node: ItemNode):
+            assert (
+                filter_data
+            ), "Should not call this without pre-checking filter_data is available"
+            if not filter_data:
+                return False
+
+            return filter_data.get_create_at_from_node(node) >= filter_data.until
+
         while True:
             result = await self._execute_query(query=query, params=new_params)
             fetched_nodes = get_nodes(result)
@@ -50,10 +60,7 @@ class BaseGitHubClient:
             if len(fetched_nodes) == 0:
                 break
 
-            if (
-                filter_data.get_create_at_from_node(fetched_nodes[0])
-                < filter_data.until
-            ):
+            if not node_is_less_then_until(fetched_nodes[0]):
                 break
 
             new_params["beforeCursor"] = page_info.startCursor
@@ -61,11 +68,9 @@ class BaseGitHubClient:
         if filter_data is None:
             return nodes
 
-        def filter_node(node: ItemNode):
-            return filter_data.get_create_at_from_node(node) < filter_data.until
-
         return sorted(
-            filter(filter_node, nodes), key=filter_data.get_create_at_from_node
+            filter(node_is_less_then_until, nodes),
+            key=filter_data.get_create_at_from_node,
         )
 
     @staticmethod

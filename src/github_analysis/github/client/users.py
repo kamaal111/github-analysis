@@ -10,13 +10,14 @@ from .validators.pull_requests import GitHubPullRequest, GitHubUsersPullRequestR
 PullRequestStates = Literal["MERGED", "OPEN", "CLOSED"]
 
 
-PER_PAGE_AMOUNT = 10
+DEFAULT_PER_PAGE_AMOUNT = 100
 
 
 class GitHubUsersClient(BaseGitHubClient):
     async def get_pull_requests(
         self,
         username: str,
+        pagination_step_amount: int | None = None,
         until: datetime | None = None,
         filter_states: list[PullRequestStates] = [],
     ) -> list[GitHubPullRequest]:
@@ -58,7 +59,9 @@ class GitHubUsersClient(BaseGitHubClient):
             "username": username,
             "filterStates": list(set(filter_states)),
             "beforeCursor": None,
-            "perPageAmount": PER_PAGE_AMOUNT,
+            "perPageAmount": pagination_step_amount
+            if pagination_step_amount is not None
+            else DEFAULT_PER_PAGE_AMOUNT,
         }
 
         def get_pull_requests(result: dict[str, Any]):

@@ -2,4 +2,7 @@ from .users import GitHubUsersClient
 
 
 class GitHubClient:
-    users = GitHubUsersClient()
+    user: GitHubUsersClient
+
+    def __init__(self) -> None:
+        self.users = GitHubUsersClient()

@@ -39,7 +39,6 @@ class GitHubUsersClient(BaseGitHubClient):
                                 totalCount
                             }
                             baseRepository {
-                                name
                                 nameWithOwner
                             }
                         }
@@ -82,6 +81,7 @@ class GitHubUsersClient(BaseGitHubClient):
             get_nodes=get_nodes,
             get_page_info=get_page_info,
             filter_data=FilterData(
-                until=until, get_create_at_from_node=get_create_at_from_node
+                until=until,
+                get_create_at_from_node=get_create_at_from_node,
             ),
         )

@@ -14,7 +14,6 @@ class GitHubAuthor(BaseModel):
 
 
 class GitHubRepository(BaseModel):
-    name: str
     nameWithOwner: str
 
 

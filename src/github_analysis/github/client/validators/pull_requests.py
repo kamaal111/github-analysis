@@ -13,7 +13,7 @@ class GitHubComments(BaseModel):
 
 class GitHubPullRequest(BaseModel):
     createdAt: datetime
-    author: GitHubAuthor
+    author: GitHubAuthor | None = None
     comments: GitHubComments
     baseRepository: GitHubRepository
     number: int

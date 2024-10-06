@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, TypeVar
 
@@ -7,7 +8,6 @@ from gql.transport.aiohttp import AIOHTTPTransport
 from graphql import DocumentNode
 
 from ..settings import settings
-from .dataclasses.filter_data import FilterData
 from .validators.page_info import GitHubPageInfo
 
 ItemNode = TypeVar("ItemNode")
@@ -31,27 +31,26 @@ class BaseGitHubClient:
         params: dict[str, Any] | None,
         get_nodes: Callable[[dict[str, Any]], list[ItemNode]],
         get_page_info: Callable[[dict[str, Any]], GitHubPageInfo],
-        filter_data: FilterData[ItemNode] | None = None,
+        get_create_at_from_node: Callable[[ItemNode], datetime],
+        fetch_all: bool = False,
+        until: datetime = None,
     ) -> list[ItemNode]:
         new_params = {**(params or {}), "beforeCursor": None}
         nodes: list[ItemNode] = []
 
         def node_is_less_then_until(node: ItemNode):
-            assert (
-                filter_data
-            ), "Should not call this without pre-checking filter_data is available"
-            if not filter_data:
+            if fetch_all:
+                return True
+
+            if until is None:
                 return False
 
-            return filter_data.get_create_at_from_node(node) >= filter_data.until
+            return get_create_at_from_node(node) >= until
 
         while True:
             result = await self._execute_query(query=query, params=new_params)
             fetched_nodes = get_nodes(result)
             nodes = nodes + fetched_nodes
-
-            if filter_data is None:
-                return nodes
 
             page_info = get_page_info(result)
             if not page_info.hasPreviousPage:
@@ -65,12 +64,9 @@ class BaseGitHubClient:
 
             new_params["beforeCursor"] = page_info.startCursor
 
-        if filter_data is None:
-            return nodes
-
         return sorted(
             filter(node_is_less_then_until, nodes),
-            key=filter_data.get_create_at_from_node,
+            key=get_create_at_from_node,
         )
 
     @staticmethod

@@ -2,19 +2,13 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
+from .author import GitHubAuthor
 from .page_info import GitHubPageInfo
+from .repository import GitHubRepository
 
 
 class GitHubComments(BaseModel):
     totalCount: int
-
-
-class GitHubAuthor(BaseModel):
-    login: str
-
-
-class GitHubRepository(BaseModel):
-    nameWithOwner: str
 
 
 class GitHubPullRequest(BaseModel):
@@ -27,13 +21,8 @@ class GitHubPullRequest(BaseModel):
 
 class GitHubPullRequests(BaseModel):
     nodes: list[GitHubPullRequest]
-    totalCount: int
     pageInfo: GitHubPageInfo
 
 
-class GitHubUsersPullRequest(BaseModel):
+class GitHubPullRequestGraph(BaseModel):
     pullRequests: GitHubPullRequests
-
-
-class GitHubUsersPullRequestResult(BaseModel):
-    user: GitHubUsersPullRequest

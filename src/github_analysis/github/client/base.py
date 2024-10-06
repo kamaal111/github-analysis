@@ -71,7 +71,7 @@ class BaseGitHubClient:
     @staticmethod
     def __setup_gql_client():
         gql_transport = AIOHTTPTransport(
-            url=f"{settings.github_base_url}/graphql",
+            url=os.path.join(settings.github_base_url_string, "graphql"),
             headers={"Authorization": f"bearer {settings.github_token}"},
         )
         graphql_api_schema = Path(

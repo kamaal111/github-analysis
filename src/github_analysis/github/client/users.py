@@ -42,6 +42,7 @@ class GitHubUsersClient(BaseGitHubClient):
                             baseRepository {
                                 nameWithOwner
                             }
+                            number
                         }
                         pageInfo {
                             hasNextPage

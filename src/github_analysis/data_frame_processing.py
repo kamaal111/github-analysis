@@ -6,11 +6,13 @@ from github_analysis.github.client.validators.pull_requests import GitHubPullReq
 def users_pull_requests_as_data_frame(users_pull_requests: list[GitHubPullRequest]):
     data_frame_data = {
         "created_at": [],
+        "pull_request_number": [],
         "amount_of_comments": [],
         "repository_name": [],
     }
     for users_pull_request in users_pull_requests:
         data_frame_data["created_at"].append(users_pull_request.createdAt)
+        data_frame_data["pull_request_number"].append(f"#{users_pull_request.number}")
         data_frame_data["amount_of_comments"].append(
             users_pull_request.comments.totalCount
         )

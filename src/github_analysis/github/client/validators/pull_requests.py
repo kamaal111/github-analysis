@@ -22,6 +22,7 @@ class GitHubPullRequest(BaseModel):
     author: GitHubAuthor
     comments: GitHubComments
     baseRepository: GitHubRepository
+    number: int
 
 
 class GitHubPullRequests(BaseModel):

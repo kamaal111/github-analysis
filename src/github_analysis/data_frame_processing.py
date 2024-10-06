@@ -1,16 +1,25 @@
 import polars as pl
 
-from github_analysis.github.client.validators.pull_requests import GitHubPullRequest
+from .github.client.validators.contributions import GitHubPullRequestContribution
+from .github.client.validators.pull_requests import GitHubPullRequest
 
 
-def users_pull_requests_as_data_frame(users_pull_requests: list[GitHubPullRequest]):
+def pull_request_reviews_as_data_frame(
+    pull_request_reviews: list[GitHubPullRequestContribution],
+):
+    data_frame_data = {}
+
+    return pl.DataFrame(data_frame_data)
+
+
+def pull_requests_as_data_frame(pull_requests: list[GitHubPullRequest]):
     data_frame_data = {
         "created_at": [],
         "pull_request_number": [],
         "amount_of_comments": [],
         "repository_name": [],
     }
-    for users_pull_request in users_pull_requests:
+    for users_pull_request in pull_requests:
         data_frame_data["created_at"].append(users_pull_request.createdAt)
         data_frame_data["pull_request_number"].append(f"#{users_pull_request.number}")
         data_frame_data["amount_of_comments"].append(

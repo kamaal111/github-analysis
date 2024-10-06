@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Any, Literal
 
 from gql import gql
+from gql.client import AsyncClientSession, ReconnectingAsyncClientSession
 
 from .base import BaseGitHubClient
 from .validators.contributions import (
@@ -22,6 +23,7 @@ class GitHubUsersClient(BaseGitHubClient):
         username: str,
         from_date: datetime | None = None,
         pagination_step_amount: int | None = None,
+        session: AsyncClientSession | ReconnectingAsyncClientSession | None = None,
     ):
         query = gql(
             """
@@ -98,6 +100,7 @@ class GitHubUsersClient(BaseGitHubClient):
             params=params,
             get_nodes=get_nodes,
             get_page_info=get_page_info,
+            session=session,
             get_create_at_from_node=get_create_at_from_node,
             fetch_all=True,
         )
@@ -108,6 +111,7 @@ class GitHubUsersClient(BaseGitHubClient):
         pagination_step_amount: int | None = None,
         until: datetime | None = None,
         filter_states: list[PullRequestStates] = [],
+        session: AsyncClientSession | ReconnectingAsyncClientSession | None = None,
     ) -> list[GitHubPullRequest]:
         query = gql(
             """
@@ -169,6 +173,7 @@ class GitHubUsersClient(BaseGitHubClient):
             params=params,
             get_nodes=get_nodes,
             get_page_info=get_page_info,
+            session=session,
             get_create_at_from_node=get_create_at_from_node,
             until=until,
         )

@@ -33,13 +33,22 @@ def pull_request_reviews_as_data_frame(
     return pl.DataFrame(data_frame_data).sort("created_at", descending=True)
 
 
+def reviews_given_to_user(pull_request_reviews: pl.DataFrame):
+    return (
+        pull_request_reviews.group_by("author")
+        .agg(pl.len().alias("pull_request_reviews_given"))
+        .sort("pull_request_reviews_given", descending=True)
+        .rename({"author": "pull_request_author"})
+    )
+
+
 def process_total_stats(
     grouped_pull_request_reviews: pl.DataFrame,
     grouped_merged_pull_requests: pl.DataFrame,
 ):
     return pl.DataFrame(
         {
-            "stat": ["reviews", "pull_requests"],
+            "stat": ["pull_request_reviews", "pull_requests"],
             "totals": [
                 grouped_pull_request_reviews.get_column("amount_of_reviews").sum(),
                 grouped_merged_pull_requests.get_column(

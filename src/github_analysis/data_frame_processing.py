@@ -33,6 +33,23 @@ def pull_request_reviews_as_data_frame(
     return pl.DataFrame(data_frame_data).sort("created_at", descending=True)
 
 
+def process_total_stats(
+    grouped_pull_request_reviews: pl.DataFrame,
+    grouped_merged_pull_requests: pl.DataFrame,
+):
+    return pl.DataFrame(
+        {
+            "stat": ["reviews", "pull_requests"],
+            "totals": [
+                grouped_pull_request_reviews.get_column("amount_of_reviews").sum(),
+                grouped_merged_pull_requests.get_column(
+                    "amount_of_pull_requests"
+                ).sum(),
+            ],
+        }
+    )
+
+
 def group_pull_request_reviews_by_repositories(pull_request_reviews: pl.DataFrame):
     return (
         pull_request_reviews.filter(pl.col("amount_of_comments") == 0)

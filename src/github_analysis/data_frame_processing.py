@@ -42,6 +42,29 @@ def reviews_given_to_user(pull_request_reviews: pl.DataFrame):
     )
 
 
+def pull_requests_aggregated_by_month(pull_requests: pl.DataFrame):
+    created_at_date = pl.col("created_at").dt
+    created_at_month = created_at_date.month()
+    created_at_year = created_at_date.year()
+
+    return (
+        pull_requests.with_columns(
+            pl.concat_str(
+                [
+                    created_at_month.cast(pl.Utf8),
+                    pl.lit("-"),
+                    created_at_year.cast(pl.Utf8),
+                ]
+            ).alias("created_at_month"),
+            ((created_at_year * 12) + (created_at_month - 1)).alias("months_weight"),
+        )
+        .group_by("created_at_month")
+        .agg(pl.len().alias("amount_pull_requests"), pl.col("months_weight").first())
+        .sort("months_weight", descending=True)
+        .select("created_at_month", "amount_pull_requests")
+    )
+
+
 def process_total_stats(
     grouped_pull_request_reviews: pl.DataFrame,
     grouped_merged_pull_requests: pl.DataFrame,

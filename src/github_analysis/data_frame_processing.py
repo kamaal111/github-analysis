@@ -53,7 +53,7 @@ def pull_requests_aggregated_by_month(pull_requests: pl.DataFrame):
                 [
                     created_at_month.cast(pl.Utf8),
                     pl.lit("-"),
-                    created_at_year.cast(pl.Utf8),
+                    (created_at_year % 100).cast(pl.Utf8),
                 ]
             ).alias("created_at_month"),
             ((created_at_year * 12) + (created_at_month - 1)).alias("months_weight"),

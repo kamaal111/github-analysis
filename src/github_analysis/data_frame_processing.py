@@ -90,9 +90,16 @@ def process_total_stats(
 ):
     return pl.DataFrame(
         {
-            "stat": ["pull_request_reviews", "pull_requests"],
+            "stat": [
+                "pull_request_reviews",
+                "instant_approve_reviews",
+                "pull_requests",
+            ],
             "totals": [
                 grouped_pull_request_reviews.get_column("amount_of_reviews").sum(),
+                grouped_pull_request_reviews.get_column(
+                    "instant_approve_reviews"
+                ).sum(),
                 grouped_merged_pull_requests.get_column(
                     "amount_of_pull_requests"
                 ).sum(),
@@ -103,9 +110,25 @@ def process_total_stats(
 
 def group_pull_request_reviews_by_repositories(pull_request_reviews: pl.DataFrame):
     return (
-        pull_request_reviews.group_by("repository_name")
-        .agg(pl.len().alias("amount_of_reviews"))
+        pull_request_reviews.with_columns(
+            pl.col("amount_of_comments")
+            .clip(upper_bound=1)
+            .alias("amount_of_comments_binary")
+        )
+        .group_by("repository_name")
+        .agg(
+            pl.len().alias("amount_of_reviews"),
+            pl.sum("amount_of_comments_binary").alias(
+                "amount_of_reviews_with_comments"
+            ),
+        )
+        .with_columns(
+            (
+                pl.col("amount_of_reviews") - pl.col("amount_of_reviews_with_comments")
+            ).alias("instant_approve_reviews")
+        )
         .sort("amount_of_reviews", descending=True)
+        .select("repository_name", "amount_of_reviews", "instant_approve_reviews")
     )
 
 

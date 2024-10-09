@@ -103,8 +103,7 @@ def process_total_stats(
 
 def group_pull_request_reviews_by_repositories(pull_request_reviews: pl.DataFrame):
     return (
-        pull_request_reviews.filter(pl.col("amount_of_comments") == 0)
-        .group_by("repository_name")
+        pull_request_reviews.group_by("repository_name")
         .agg(pl.len().alias("amount_of_reviews"))
         .sort("amount_of_reviews", descending=True)
     )

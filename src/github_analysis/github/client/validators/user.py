@@ -1,5 +1,5 @@
 from pydantic import BaseModel
 
 
-class GitHubAuthor(BaseModel):
+class GitHubUser(BaseModel):
     login: str

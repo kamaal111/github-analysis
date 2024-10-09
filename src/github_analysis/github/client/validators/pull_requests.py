@@ -2,21 +2,26 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-from .author import GitHubAuthor
 from .page_info import GitHubPageInfo
 from .repository import GitHubRepository
+from .user import GitHubUser
 
 
 class GitHubComments(BaseModel):
     totalCount: int
 
 
+class GitHubPullRequestParticipantsGraph(BaseModel):
+    nodes: list[GitHubUser]
+
+
 class GitHubPullRequest(BaseModel):
     createdAt: datetime
-    author: GitHubAuthor | None = None
+    author: GitHubUser | None = None
     comments: GitHubComments
     baseRepository: GitHubRepository
     number: int
+    participants: GitHubPullRequestParticipantsGraph | None = None
 
 
 class GitHubPullRequests(BaseModel):

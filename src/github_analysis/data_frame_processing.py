@@ -1,3 +1,5 @@
+from functools import reduce
+
 import polars as pl
 
 from .github.client.validators.contributions import GitHubPullRequestContribution
@@ -39,6 +41,23 @@ def reviews_given_to_user(pull_request_reviews: pl.DataFrame):
         .agg(pl.len().alias("pull_request_reviews_given"))
         .sort("pull_request_reviews_given", descending=True)
         .rename({"author": "pull_request_author"})
+    )
+
+
+def reviews_given_by_users(pull_requests: pl.DataFrame):
+    return (
+        pl.DataFrame(
+            {
+                "reviewer": reduce(
+                    lambda acc, reviewers: acc + reviewers,
+                    pull_requests.get_column("reviewers").to_list(),
+                    [],
+                )
+            }
+        )
+        .group_by("reviewer")
+        .agg(pl.len().alias("reviews_given"))
+        .sort("reviews_given", descending=True)
     )
 
 
@@ -97,6 +116,7 @@ def pull_requests_as_data_frame(pull_requests: list[GitHubPullRequest]):
         "pull_request_number": [],
         "amount_of_comments": [],
         "repository_name": [],
+        "reviewers": [],
     }
     for users_pull_request in pull_requests:
         data_frame_data["created_at"].append(users_pull_request.createdAt)
@@ -107,6 +127,12 @@ def pull_requests_as_data_frame(pull_requests: list[GitHubPullRequest]):
         data_frame_data["repository_name"].append(
             users_pull_request.baseRepository.nameWithOwner
         )
+        reviewers: set[str] = set()
+        if users_pull_request.participants:
+            for participant in users_pull_request.participants.nodes:
+                if users_pull_request.author.login != participant.login:
+                    reviewers.add(participant.login)
+        data_frame_data["reviewers"].append(list(reviewers))
 
     return pl.DataFrame(data_frame_data).sort("created_at", descending=True)
 

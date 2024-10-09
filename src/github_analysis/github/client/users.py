@@ -135,6 +135,11 @@ class GitHubUsersClient(BaseGitHubClient):
                                 nameWithOwner
                             }
                             number
+                            participants(first: 20) {
+                                nodes {
+                                    login
+                                }
+                            }
                         }
                         pageInfo {
                             hasPreviousPage

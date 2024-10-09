@@ -1,13 +1,13 @@
 from pydantic import BaseModel
 
-from .author import GitHubAuthor
 from .page_info import GitHubPageInfo
 from .pull_requests import GitHubPullRequest
 from .repository import GitHubRepository
+from .user import GitHubUser
 
 
 class GitHubPullRequestReview(BaseModel):
-    author: GitHubAuthor
+    author: GitHubUser
 
 
 class GitHubPullRequestContribution(BaseModel):

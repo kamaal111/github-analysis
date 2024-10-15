@@ -121,14 +121,24 @@ def group_pull_request_reviews_by_repositories(pull_request_reviews: pl.DataFram
             pl.sum("amount_of_comments_binary").alias(
                 "amount_of_reviews_with_comments"
             ),
+            pl.col("amount_of_comments").sum().alias("total_amount_of_comments_given"),
+            pl.col("amount_of_comments")
+            .mean()
+            .alias("average_amount_of_comments_per_pull_request"),
         )
         .with_columns(
             (
                 pl.col("amount_of_reviews") - pl.col("amount_of_reviews_with_comments")
-            ).alias("instant_approve_reviews")
+            ).alias("instant_approve_reviews"),
         )
         .sort("amount_of_reviews", descending=True)
-        .select("repository_name", "amount_of_reviews", "instant_approve_reviews")
+        .select(
+            "repository_name",
+            "amount_of_reviews",
+            "instant_approve_reviews",
+            "total_amount_of_comments_given",
+            "average_amount_of_comments_per_pull_request",
+        )
     )
 
 

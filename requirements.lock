@@ -167,6 +167,8 @@ mistune==3.0.2
 multidict==6.1.0
     # via aiohttp
     # via yarl
+narwhals==1.9.4
+    # via github-analysis
 nbclient==0.10.0
     # via nbconvert
 nbconvert==7.16.4

@@ -103,6 +103,7 @@ class GitHubUsersClient(BaseGitHubClient):
             session=session,
             get_create_at_from_node=get_create_at_from_node,
             fetch_all=True,
+            until=None,
         )
 
     async def get_pull_requests(
@@ -160,7 +161,7 @@ class GitHubUsersClient(BaseGitHubClient):
         }
 
         def get_pull_requests(result: dict[str, Any]):
-            validated_result = GitHubPullRequestGraph(**result.get("user"))
+            validated_result = GitHubPullRequestGraph(**result.get("user", {}))
 
             return validated_result.pullRequests
 

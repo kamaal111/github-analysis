@@ -43,7 +43,7 @@ class GitHubService:
                     session=session,
                 ),
             ]
-        )
+        )  # type: ignore
 
     async def get_users_reviews(
         self,

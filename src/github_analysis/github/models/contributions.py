@@ -3,7 +3,7 @@ from sqlmodel import JSON, Field, SQLModel
 
 
 class PullRequestReviewsCache(SQLModel, table=True):
-    __tablename__ = "pull_request_review_cache"
+    __tablename__: str = "pull_request_review_cache"
     __table_args__ = (
         UniqueConstraint(
             "username",

@@ -37,7 +37,7 @@ class BaseGitHubClient:
         get_create_at_from_node: Callable[[ItemNode], datetime],
         session: AsyncClientSession | ReconnectingAsyncClientSession | None = None,
         fetch_all: bool = False,
-        until: datetime = None,
+        until: datetime | None = None,
     ) -> list[ItemNode]:
         new_params = {**(params or {}), "beforeCursor": None}
         nodes: list[ItemNode] = []

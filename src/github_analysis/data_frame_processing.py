@@ -8,7 +8,7 @@ from .github.client.validators.pull_requests import GitHubPullRequest
 
 def pull_request_reviews_as_data_frame(
     pull_request_reviews: list[GitHubPullRequestContribution],
-):
+) -> pl.LazyFrame:
     data_frame_data = {
         "created_at": [],
         "author": [],
@@ -32,10 +32,10 @@ def pull_request_reviews_as_data_frame(
         )
         data_frame_data["created_at"].append(pull_request_review.pullRequest.createdAt)
 
-    return pl.DataFrame(data_frame_data).sort("created_at", descending=True)
+    return pl.LazyFrame(data_frame_data).sort("created_at", descending=True)
 
 
-def reviews_given_to_user(pull_request_reviews: pl.DataFrame):
+def reviews_given_to_user(pull_request_reviews: pl.LazyFrame) -> pl.LazyFrame:
     return (
         pull_request_reviews.group_by("author")
         .agg(pl.len().alias("pull_request_reviews_given"))
@@ -44,13 +44,13 @@ def reviews_given_to_user(pull_request_reviews: pl.DataFrame):
     )
 
 
-def reviews_given_by_users(pull_requests: pl.DataFrame):
+def reviews_given_by_users(pull_requests: pl.LazyFrame) -> pl.LazyFrame:
     return (
-        pl.DataFrame(
+        pl.LazyFrame(
             {
                 "reviewer": reduce(
                     lambda acc, reviewers: acc + reviewers,
-                    pull_requests.get_column("reviewers").to_list(),
+                    pull_requests.collect().get_column("reviewers").to_list(),
                     [],
                 )
             }
@@ -61,7 +61,7 @@ def reviews_given_by_users(pull_requests: pl.DataFrame):
     )
 
 
-def pull_requests_aggregated_by_month(pull_requests: pl.DataFrame):
+def pull_requests_aggregated_by_month(pull_requests: pl.LazyFrame) -> pl.LazyFrame:
     created_at_date = pl.col("created_at").dt
     created_at_month = created_at_date.month()
     created_at_year = created_at_date.year()
@@ -85,10 +85,11 @@ def pull_requests_aggregated_by_month(pull_requests: pl.DataFrame):
 
 
 def process_total_stats(
-    grouped_pull_request_reviews: pl.DataFrame,
-    grouped_merged_pull_requests: pl.DataFrame,
-):
-    return pl.DataFrame(
+    grouped_pull_request_reviews: pl.LazyFrame,
+    grouped_merged_pull_requests: pl.LazyFrame,
+) -> pl.LazyFrame:
+    collected_grouped_pull_request_reviews = grouped_pull_request_reviews.collect()
+    return pl.LazyFrame(
         {
             "stat": [
                 "pull_request_reviews",
@@ -96,19 +97,23 @@ def process_total_stats(
                 "pull_requests",
             ],
             "totals": [
-                grouped_pull_request_reviews.get_column("amount_of_reviews").sum(),
-                grouped_pull_request_reviews.get_column(
+                collected_grouped_pull_request_reviews.get_column(
+                    "amount_of_reviews"
+                ).sum(),
+                collected_grouped_pull_request_reviews.get_column(
                     "instant_approve_reviews"
                 ).sum(),
-                grouped_merged_pull_requests.get_column(
-                    "amount_of_pull_requests"
-                ).sum(),
+                grouped_merged_pull_requests.collect()
+                .get_column("amount_of_pull_requests")
+                .sum(),
             ],
         }
     )
 
 
-def group_pull_request_reviews_by_repositories(pull_request_reviews: pl.DataFrame):
+def group_pull_request_reviews_by_repositories(
+    pull_request_reviews: pl.LazyFrame,
+) -> pl.LazyFrame:
     return (
         pull_request_reviews.with_columns(
             pl.col("amount_of_comments")
@@ -142,7 +147,7 @@ def group_pull_request_reviews_by_repositories(pull_request_reviews: pl.DataFram
     )
 
 
-def pull_requests_as_data_frame(pull_requests: list[GitHubPullRequest]):
+def pull_requests_as_data_frame(pull_requests: list[GitHubPullRequest]) -> pl.LazyFrame:
     data_frame_data = {
         "created_at": [],
         "pull_request_number": [],
@@ -162,14 +167,16 @@ def pull_requests_as_data_frame(pull_requests: list[GitHubPullRequest]):
         reviewers: set[str] = set()
         if users_pull_request.participants:
             for participant in users_pull_request.participants.nodes:
-                if users_pull_request.author.login != participant.login:
+                if (
+                    author := users_pull_request.author
+                ) and author.login != participant.login:
                     reviewers.add(participant.login)
         data_frame_data["reviewers"].append(list(reviewers))
 
-    return pl.DataFrame(data_frame_data).sort("created_at", descending=True)
+    return pl.LazyFrame(data_frame_data).sort("created_at", descending=True)
 
 
-def group_pull_requests_by_repositories(pull_requests: pl.DataFrame):
+def group_pull_requests_by_repositories(pull_requests: pl.LazyFrame) -> pl.LazyFrame:
     return (
         pull_requests.group_by("repository_name")
         .agg(pl.len().alias("amount_of_pull_requests"))
